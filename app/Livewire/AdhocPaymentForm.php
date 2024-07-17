@@ -19,23 +19,30 @@ class AdhocPaymentForm extends Component
     {
         if (!$this->paymentMethod) {
             $this->paymentStatus = 'error';
+            session()->flash('error_message', 'Payment method not provided.');
             return;
         }
 
-        Stripe::setApiKey(config('services.stripe.secret'));
-
         try {
+            Stripe::setApiKey(config('services.stripe.secret'));
+
             $intent = PaymentIntent::create([
-                'amount' => 1000, // £10 in cents
+                'amount' => 1002, // £10 in cents
                 'currency' => 'gbp',
                 'payment_method' => $this->paymentMethod,
-                'confirmation_method' => 'manual',
+                // 'confirmation_method' => 'manual', // Commented out to avoid the error
                 'confirm' => true,
+                'automatic_payment_methods' => [
+                    'enabled' => true,
+                    'allow_redirects' => 'never', // Disable redirects
+                ],
             ]);
 
             $this->paymentStatus = 'success';
         } catch (\Exception $e) {
             $this->paymentStatus = 'error';
+            session()->flash('error_message', $e->getMessage());
+            \Log::error('Payment Error: ' . $e->getMessage());
         }
     }
 

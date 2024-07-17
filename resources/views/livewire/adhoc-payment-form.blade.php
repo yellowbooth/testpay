@@ -7,12 +7,16 @@
         <div class="alert alert-danger">
             There was an error processing your payment. Please try again.
         </div>
+        <div>
+            <p><strong>Error Details:</strong></p>
+            <p>{{ session('error_message') }}</p>
+        </div>
     @else
         <form id="payment-form">
             <div id="card-element">
                 <!-- A Stripe Element will be inserted here. -->
             </div>
-            <button id="submit">Pay £10</button>
+            <button id="submit">Pay £10.02</button>
             <div id="card-errors" role="alert"></div>
         </form>
     @endif
@@ -45,9 +49,8 @@
                 document.getElementById('card-errors').textContent = error.message;
             } else {
                 // Send the paymentMethod.id to your server.
-                @this.set('paymentMethod', paymentMethod.id, () => {
-                    @this.call('pay');
-                });
+                @this.set('paymentMethod', paymentMethod.id);
+                @this.call('pay');
             }
         });
     });
