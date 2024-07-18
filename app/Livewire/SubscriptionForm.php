@@ -6,6 +6,8 @@ use Stripe\Stripe;
 use Stripe\Customer;
 use Stripe\PaymentMethod;
 use Stripe\Subscription;
+use App\Models\User;
+use Auth;
 
 class SubscriptionForm extends Component
 {
@@ -43,6 +45,11 @@ class SubscriptionForm extends Component
                 'items' => [['price' => 'price_1PcAA0FAg1veKjiGhT8jVY5H']],
                 'default_payment_method' => $paymentMethod->id,
             ]);
+
+            // Store the Stripe customer ID in the users table
+            $user = auth::user();
+            $user->stripe_customer_id = $customer->id;
+            $user->save();
 
             $this->paymentStatus = 'success';
         } catch (\Exception $e) {

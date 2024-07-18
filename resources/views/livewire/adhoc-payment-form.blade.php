@@ -16,7 +16,7 @@
             <div id="card-element">
                 <!-- A Stripe Element will be inserted here. -->
             </div>
-            <button id="submit">Pay £10.02</button>
+            <button id="submit">Pay £10</button>
             <div id="card-errors" role="alert"></div>
         </form>
     @endif
@@ -34,21 +34,23 @@
 
         form.addEventListener('submit', async (event) => {
             event.preventDefault();
+            console.log('Form submitted');
 
             const { paymentMethod, error } = await stripe.createPaymentMethod({
                 type: 'card',
                 card: cardElement,
                 billing_details: {
-                    // Include any additional billing details you want to collect
-                    name: 'Customer Name'
+                    name: 'Customer Name' // Replace with actual customer name if available
                 },
             });
 
             if (error) {
+                console.log('Error creating payment method:', error);
                 // Display error.message in your UI.
                 document.getElementById('card-errors').textContent = error.message;
             } else {
-                // Send the paymentMethod.id to your server.
+                console.log('Payment method created:', paymentMethod.id);
+                // Send the paymentMethod.id and customerId to your server.
                 @this.set('paymentMethod', paymentMethod.id);
                 @this.call('pay');
             }

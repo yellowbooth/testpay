@@ -4,6 +4,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use Stripe\Stripe;
 use Stripe\PaymentIntent;
+use Auth;
 
 class AdhocPaymentForm extends Component
 {
@@ -17,9 +18,12 @@ class AdhocPaymentForm extends Component
 
     public function pay()
     {
-        if (!$this->paymentMethod) {
+        $user = Auth::user();
+        $customerId = $user->stripe_customer_id;
+
+        if (!$this->paymentMethod || !$customerId) {
             $this->paymentStatus = 'error';
-            session()->flash('error_message', 'Payment method not provided.');
+            session()->flash('error_message', 'Payment method or customer ID not provided.');
             return;
         }
 
@@ -27,10 +31,10 @@ class AdhocPaymentForm extends Component
             Stripe::setApiKey(config('services.stripe.secret'));
 
             $intent = PaymentIntent::create([
-                'amount' => 1002, // £10 in cents
+                'amount' => 1000, // £10 in cents
                 'currency' => 'gbp',
+                'customer' => $customerId, // Associate with the customer
                 'payment_method' => $this->paymentMethod,
-                // 'confirmation_method' => 'manual', // Commented out to avoid the error
                 'confirm' => true,
                 'automatic_payment_methods' => [
                     'enabled' => true,
